@@ -82,7 +82,13 @@ const eventSet = () => {
         const inputElement = document.getElementById(field);
         inputElement.addEventListener('input', event =>
             onChangeHandler(event, field === 'id' ? 'id' : 'password'),
-        )
+        );
+
+        if (field === 'id') {
+            inputElement.addEventListener('focusout', event =>
+                lottieAnimation(validEmail(event.target.value) ? 1 : 2),
+            );
+        }
     });
 
     document
@@ -96,8 +102,26 @@ const onChangeHandler = (event, uid) => {
 };
 
 const validateEmail = input => {
-    const regex = /^[A-Za-z0-9@._-]+$/;
+    const regex = /^[A-Za-z0-9@.]+$/;
     if (!regex.test(input.value)) input.value = input.value.slice(0, -1);
+};
+
+let lottieInstance = null;
+const lottieAnimation = type => {
+    const container = document.getElementById('lottie-animation');
+    const animationPaths = [
+        '/public/check_anim.json',
+        '/public/denied_anim.json',
+    ];
+    if (lottieInstance) lottieInstance.destroy();
+    container.innerHTML = '';
+    lottieInstance = window.lottie.loadAnimation({
+        container,
+        renderer: 'svg',
+        loop: false,
+        autoplay: true,
+        path: animationPaths[type - 1],
+    });
 };
 
 const init = async () => {

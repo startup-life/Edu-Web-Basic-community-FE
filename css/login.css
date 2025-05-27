@@ -49,6 +49,19 @@ article {
     background-color: transparent;
 }
 
+.inputBox input[type='text'] {
+    flex-grow: 1; /* 입력 필드가 가능한 많은 공간을 차지하도록 함 */
+    padding-right: 10px; /* 오른쪽에 Lottie 애니메이션을 위한 공간 확보 */
+}
+.inputBox .lottie {
+    position: absolute;
+    right: 10px; /* 입력 필드 오른쪽 끝에서 10px 떨어진 위치 */
+    top: 50%; /* 상단에서 50% 위치 */
+
+    width: 20px; /* Lottie 애니메이션 크기, 필요에 따라 조정 */
+    height: 20px; /* Lottie 애니메이션 크기, 필요에 따라 조정 */
+}
+
 .inputBox input[type='file'] {
     border: none;
     padding: 8px 0px;
