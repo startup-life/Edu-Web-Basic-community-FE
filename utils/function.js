@@ -1,5 +1,3 @@
-import Dialog from '../component/dialog/dialog.js';
-
 export const getServerUrl = () => {
     const host = window.location.hostname;
     return host.includes('localhost')
@@ -7,72 +5,26 @@ export const getServerUrl = () => {
         : `http://${host}:3000`;
 };
 
-export const setCookie = (cookie_name, value, days) => {
-    const exdate = new Date();
-    exdate.setDate(exdate.getDate() + days);
-    // 설정 일수만큼 현재시간에 만료값으로 지정
-
-    const cookie_value =
-        escape(value) +
-        (days == null ? '' : `; expires=${exdate.toUTCString()}`);
-    document.cookie = `${cookie_name}=${cookie_value}`;
-};
-
-export const getCookie = cookie_name => {
-    let x;
-    let y;
-    const val = document.cookie.split(';');
-
-    for (let i = 0; i < val.length; i++) {
-        x = val[i].substr(0, val[i].indexOf('='));
-        y = val[i].substr(val[i].indexOf('=') + 1);
-        x = x.replace(/^\s+|\s+$/g, ''); // 앞과 뒤의 공백 제거하기
-        if (x == cookie_name) {
-            return unescape(y); // unescape로 디코딩 후 값 리턴
-        }
-    }
-};
-
-export const deleteCookie = cookie_name => {
-    setCookie(cookie_name, '', -1);
-};
-
 export const serverSessionCheck = async () => {
     const res = await fetch(`${getServerUrl()}/users/auth/check`, {
         method: 'GET',
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
+        credentials: 'include',
     });
     return res;
 };
 
 export const authCheck = async () => {
     const HTTP_OK = 200;
-    const session = getCookie('session');
-    if (session === undefined) {
-        location.href = '/html/login.html';
-    }
-
-    // const data = await serverSessionCheck();
     const response = await serverSessionCheck();
-    if (!response || response.status !== HTTP_OK) {
-        deleteCookie('session');
-        deleteCookie('userId');
+    if (!response || response.status !== HTTP_OK)
         location.href = '/html/login.html';
-    }
     return response;
 };
 
 export const authCheckReverse = async () => {
-    const session = getCookie('session');
-    if (session) {
-        const response = await serverSessionCheck();
-        const data = await response.json();
-        if (data) {
-            location.href = '/';
-        }
+    const response = await serverSessionCheck();
+    if (response && response.ok) {
+        location.href = '/';
     }
 };
 // 이메일 유효성 검사

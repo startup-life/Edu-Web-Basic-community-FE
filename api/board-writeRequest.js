@@ -1,4 +1,4 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
 
 export const createPost = boardData => {
     const result = fetch(`${getServerUrl()}/posts`, {
@@ -6,9 +6,8 @@ export const createPost = boardData => {
         body: JSON.stringify(boardData),
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: getCookie('userId'),
         },
+        credentials: 'include',
     });
     return result;
 };
@@ -19,9 +18,8 @@ export const updatePost = (postId, boardData) => {
         body: JSON.stringify(boardData),
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: getCookie('userId'),
         },
+        credentials: 'include',
     });
 
     return result;
@@ -39,11 +37,7 @@ export const fileUpload = formData => {
 export const getBoardItem = postId => {
     const result = fetch(getServerUrl() + `/posts/${postId}`, {
         method: 'GET',
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
-        noCORS: true,
+        credentials: 'include',
     });
 
     return result;

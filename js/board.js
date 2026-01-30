@@ -3,7 +3,6 @@ import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import {
     authCheck,
-    getCookie,
     getServerUrl,
     prependChild,
     padTo2Digits,

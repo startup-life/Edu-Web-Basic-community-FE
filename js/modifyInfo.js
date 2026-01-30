@@ -5,8 +5,6 @@ import {
     authCheck,
     prependChild,
     getServerUrl,
-    getCookie,
-    deleteCookie,
     validNickname,
 } from '../utils/function.js';
 import { userModify, userDelete } from '../api/modifyInfoRequest.js';
@@ -23,6 +21,7 @@ const modifyBtnElement = document.querySelector('#signupBtn');
 const profilePreview = document.querySelector('#profilePreview');
 const authDataReponse = await authCheck();
 const authData = await authDataReponse.json();
+const userId = authData.data.userId;
 const changeData = {
     nickname: authData.data.nickname,
     profileImagePath: authData.data.profileImagePath,
@@ -141,7 +140,6 @@ const changeEventHandler = async (event, uid) => {
 };
 
 const sendModifyData = async () => {
-    const userId = getCookie('userId');
     const button = document.querySelector('#signupBtn');
 
     if (!button.disabled) {
@@ -165,13 +163,18 @@ const sendModifyData = async () => {
 
 // 회원 탈퇴
 const deleteAccount = async () => {
-    const userId = getCookie('userId');
     const callback = async () => {
         const response = await userDelete(userId);
 
         if (response.status === HTTP_OK) {
-            deleteCookie('session');
-            deleteCookie('userId');
+            try {
+                await fetch(`${getServerUrl()}/users/logout`, {
+                    method: 'POST',
+                    credentials: 'include',
+                });
+            } catch (error) {
+                console.error('로그아웃 요청 실패:', error);
+            }
             location.href = '/html/login.html';
         } else {
             Dialog('회원 탈퇴 실패', '회원 탈퇴에 실패했습니다.');

@@ -1,6 +1,4 @@
-import { deleteCookie, getCookie, getServerUrl } from '../../utils/function.js';
-
-const DEFAULT_PROFILE_IMAGE = '/public/image/profile/default.jpg';
+import { getServerUrl } from '../../utils/function.js';
 
 const headerDropdownMenu = () => {
     const wrap = document.createElement('div');
@@ -15,10 +13,15 @@ const headerDropdownMenu = () => {
 
     modifyInfoLink.href = '/html/modifyInfo.html';
     modifyPasswordLink.href = '/html/modifyPassword.html';
-    logoutLink.addEventListener('click', () => {
-        deleteCookie('session');
-        deleteCookie('userId');
-        location.href = '/html/login.html';
+    logoutLink.addEventListener('click', async () => {
+        try {
+            await fetch(`${getServerUrl()}/users/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } finally {
+            location.href = '/html/login.html';
+        }
     });
 
     wrap.classList.add('drop');
@@ -36,7 +39,7 @@ const headerDropdownMenu = () => {
 const Header = (
     title,
     leftBtn = 0,
-    profileImage = DEFAULT_PROFILE_IMAGE,
+    profileImage = null,
 ) => {
     let leftBtnElement;
     let rightBtnElement;
@@ -58,26 +61,24 @@ const Header = (
     }
 
     if (profileImage) {
-        if (getCookie('session')) {
-            rightBtnElement = document.createElement('div');
-            rightBtnElement.classList.add('profile');
+        rightBtnElement = document.createElement('div');
+        rightBtnElement.classList.add('profile');
 
-            const profileElement = document.createElement('img');
-            profileElement.classList.add('profile');
-            profileElement.loading = 'eager';
-            profileElement.src = profileImage;
+        const profileElement = document.createElement('img');
+        profileElement.classList.add('profile');
+        profileElement.loading = 'eager';
+        profileElement.src = profileImage;
 
-            const Drop = headerDropdownMenu();
-            Drop.classList.add('none');
+        const Drop = headerDropdownMenu();
+        Drop.classList.add('none');
 
-            profileElement.addEventListener('click', () => {
-                Drop.classList.toggle('none');
-                event.stopPropagation();
-            });
+        profileElement.addEventListener('click', () => {
+            Drop.classList.toggle('none');
+            event.stopPropagation();
+        });
 
-            rightBtnElement.appendChild(profileElement);
-            rightBtnElement.appendChild(Drop);
-        }
+        rightBtnElement.appendChild(profileElement);
+        rightBtnElement.appendChild(Drop);
     }
 
     h1Element = document.createElement('h1');

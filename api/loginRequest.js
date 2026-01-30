@@ -1,4 +1,4 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
 
 export const userLogin = async (email, password) => {
     const result = await fetch(`${getServerUrl()}/users/login`, {
@@ -6,6 +6,7 @@ export const userLogin = async (email, password) => {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
             email: email,
             password: password,

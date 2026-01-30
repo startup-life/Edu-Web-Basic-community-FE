@@ -2,7 +2,6 @@ import Header from '../component/header/header.js';
 import {
     authCheckReverse,
     prependChild,
-    setCookie,
     validEmail,
 } from '../utils/function.js';
 import { userLogin } from '../api/loginRequest.js';
@@ -32,7 +31,6 @@ const loginClick = async () => {
         return;
     }
 
-    const result = await response.json();
     if (response.status !== HTTP_OK) {
         updateHelperText(
             helperTextElement,
@@ -42,8 +40,6 @@ const loginClick = async () => {
     }
     updateHelperText(helperTextElement);
 
-    setCookie('session', result.data.sessionId, 14);
-    setCookie('userId', result.data.userId, 14);
     location.href = '/html/index.html';
 };
 
@@ -130,7 +126,6 @@ const init = async () => {
     prependChild(document.body, Header('커뮤니티', 0));
     eventSet();
     localStorage.clear();
-    document.cookie = '';
 };
 
 init();

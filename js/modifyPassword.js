@@ -3,7 +3,6 @@ import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import {
     authCheck,
-    deleteCookie,
     getServerUrl,
     prependChild,
     validPassword,
@@ -100,8 +99,14 @@ const modifyPassword = async () => {
     const response = await changePassword(userId, password);
 
     if (response.status == HTTP_CREATED) {
-        deleteCookie('session');
-        deleteCookie('userId');
+        try {
+            await fetch(`${getServerUrl()}/users/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error('로그아웃 요청 실패:', error);
+        }
         localStorage.clear();
         location.href = '/html/login.html';
     } else {
