@@ -30,7 +30,7 @@ const setBoardItem = boardData => {
                     data.created_at,
                     data.post_title,
                     data.hits,
-                    data.profileImagePath === null ? null : data.profileImagePath,
+                    data.profileImageUrl === null ? null : data.profileImageUrl,
                     data.nickname,
                     data.comment_count,
                     data.like,
@@ -81,12 +81,14 @@ const init = async () => {
             return;
         }
 
-        const profileImagePath =
-            data.data.profileImagePath === null ? DEFAULT_PROFILE_IMAGE : `${getServerUrl()}${data.data.profileImagePath}`;
+        const profileImageUrl =
+            data.data.profileImageUrl === null
+                ? DEFAULT_PROFILE_IMAGE
+                : `${getServerUrl()}${data.data.profileImageUrl}`;
 
         prependChild(
             document.body,
-            Header('Community', 0, profileImagePath),
+            Header('Community', 0, profileImageUrl),
         );
 
         const boardList = await getBoardItem();

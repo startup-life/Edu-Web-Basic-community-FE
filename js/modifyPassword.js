@@ -17,9 +17,9 @@ const dataResponse = await authCheck();
 const data = await dataResponse.json();
 const userId = data.data.userId;
 const profileImage =
-    data.data.profileImagePath === undefined || data.data.profileImagePath === null
+    data.data.profileImageUrl === undefined || data.data.profileImageUrl === null
         ? DEFAULT_PROFILE_IMAGE
-        : `${getServerUrl()}${data.data.profileImagePath}`;
+        : `${getServerUrl()}${data.data.profileImageUrl}`;
 
 const modifyData = {
     password: '',

@@ -185,9 +185,9 @@ const init = async () => {
             window.location.href = '/html/login.html';
         }
         const profileImage =
-            myInfo.profileImagePath === undefined || myInfo.profileImagePath === null
+            myInfo.profileImageUrl === undefined || myInfo.profileImageUrl === null
                 ? DEFAULT_PROFILE_IMAGE
-                : `${getServerUrl()}${myInfo.profileImagePath}`;
+                : `${getServerUrl()}${myInfo.profileImageUrl}`;
 
         prependChild(document.body, Header('커뮤니티', 2, profileImage));
 

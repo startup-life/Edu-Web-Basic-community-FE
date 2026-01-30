@@ -24,7 +24,7 @@ const authData = await authDataReponse.json();
 const userId = authData.data.userId;
 const changeData = {
     nickname: authData.data.nickname,
-    profileImagePath: authData.data.profileImagePath,
+    profileImageUrl: authData.data.profileImageUrl,
 };
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
@@ -33,19 +33,19 @@ const HTTP_CREATED = 201;
 
 const setData = data => {
     if (
-        // data.profileImagePath === DEFAULT_PROFILE_IMAGE ||
-        data.profileImagePath === null
+        // data.profileImageUrl === DEFAULT_PROFILE_IMAGE ||
+        data.profileImageUrl === null
     ) {
         profilePreview.src = DEFAULT_PROFILE_IMAGE;
     } else {
-        profilePreview.src = `${getServerUrl()}${data.profileImagePath}`;
+        profilePreview.src = `${getServerUrl()}${data.profileImageUrl}`;
 
-        const profileImagePath = data.profileImagePath;
-        const fileName = profileImagePath.split('/').pop();
-        localStorage.setItem('profilePath', data.profileImagePath);
+        const profileImageUrl = data.profileImageUrl;
+        const fileName = profileImageUrl.split('/').pop();
+        localStorage.setItem('profileImageUrl', data.profileImageUrl);
 
         const profileImage = new File(
-            [`${getServerUrl()}${profileImagePath}`],
+            [`${getServerUrl()}${profileImageUrl}`],
             fileName,
             { type: '' },
         );
@@ -62,7 +62,7 @@ const observeData = () => {
     const button = document.querySelector('#signupBtn');
     if (
         authData.data.nickname !== changeData.nickname ||
-        authData.data.profileImagePath !== changeData.profileImagePath
+        authData.data.profileImageUrl !== changeData.profileImageUrl
     ) {
         button.disabled = false;
         button.style.backgroundColor = '#7F6AEE';
@@ -109,28 +109,34 @@ const changeEventHandler = async (event, uid) => {
     } else if (uid == 'profile') {
         // 사용자가 선택한 파일
         const file = event.target.files[0];
-        console.log(changeData.profileImagePath);
+        console.log(changeData.profileImageUrl);
         if (!file) {
-            localStorage.removeItem('profilePath');
+            localStorage.removeItem('profileImageUrl');
             profilePreview.src = DEFAULT_PROFILE_IMAGE;
-            changeData.profileImagePath = null;
+            changeData.profileImageUrl = null;
         } else {
             const formData = new FormData();
             formData.append('profileImage', file);
 
             // 파일 업로드를 위한 POST 요청 실행
             try {
-                const response = await fetch(`${getServerUrl()}/users/upload/profile-image`, {
-                    method: 'POST',
-                    body: formData,
-                });
+                const response = await fetch(
+                    `${getServerUrl()}/users/upload/profile-image`,
+                    {
+                        method: 'POST',
+                        body: formData,
+                    },
+                );
 
                 if (!response.ok) throw new Error('서버 응답 오류');
 
                 const result = await response.json(); // 응답을 JSON으로 변환
-                localStorage.setItem('profilePath', result.data.filePath);
-                changeData.profileImagePath = result.data.filePath;
-                profilePreview.src = `${getServerUrl()}${result.data.filePath}`;
+                localStorage.setItem(
+                    'profileImageUrl',
+                    result.data.profileImageUrl,
+                );
+                changeData.profileImageUrl = result.data.profileImageUrl;
+                profilePreview.src = `${getServerUrl()}${result.data.profileImageUrl}`;
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
             }
@@ -149,11 +155,11 @@ const sendModifyData = async () => {
             const response = await userModify(userId, changeData);
 
             if (response.status === HTTP_CREATED) {
-                localStorage.removeItem('profilePath');
+                localStorage.removeItem('profileImageUrl');
                 saveToastMessage('수정완료');
                 location.href = '/html/modifyInfo.html';
             } else {
-                localStorage.removeItem('profilePath');
+                localStorage.removeItem('profileImageUrl');
                 saveToastMessage('수정실패');
                 location.href = '/html/modifyInfo.html';
             }
@@ -245,9 +251,9 @@ const displayToastFromStorage = () => {
 
 const init = () => {
     const profileImage =
-        authData.data.profileImagePath === null || authData.data.profileImagePath === undefined
+        authData.data.profileImageUrl === null || authData.data.profileImageUrl === undefined
             ? DEFAULT_PROFILE_IMAGE
-            : `${getServerUrl()}${authData.data.profileImagePath}`;
+            : `${getServerUrl()}${authData.data.profileImageUrl}`;
 
     prependChild(document.body, Header('커뮤니티', 2, profileImage));
     setData(authData.data);

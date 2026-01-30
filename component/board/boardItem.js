@@ -34,7 +34,8 @@ const BoardItem = (
     const formattedDate = `${year}-${padTo2Digits(month)}-${padTo2Digits(day)} ${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
 
     const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
-    const profileImagePath = imgUrl === null ? DEFAULT_PROFILE_IMAGE : `${getServerUrl()}${imgUrl}`;
+    const profileImageUrl =
+        imgUrl === null ? DEFAULT_PROFILE_IMAGE : `${getServerUrl()}${imgUrl}`;
     // const API_HOST = getServerUrl();
 
     return `
@@ -49,7 +50,7 @@ const BoardItem = (
             </div>
             <div class="writerInfo">
             <picture class="img">
-                <img src="${`${profileImagePath}`}" alt="img">
+                <img src="${`${profileImageUrl}`}" alt="img">
             </picture>
             <h2 class="writer">${writer}</h2>
         </div>

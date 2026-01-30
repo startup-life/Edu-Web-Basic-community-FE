@@ -22,7 +22,7 @@ const signupData = {
     email: '',
     password: '',
     nickname: '',
-    profileImagePath: undefined,
+    profileImageUrl: undefined,
 };
 
 const getSignupData = () => {
@@ -37,8 +37,8 @@ const getSignupData = () => {
 
 const sendSignupData = async () => {
     const { passwordCheck, ...props } = signupData;
-    if (localStorage.getItem('profilePath')) {
-        props.profileImagePath = localStorage.getItem('profilePath');
+    if (localStorage.getItem('profileImageUrl')) {
+        props.profileImageUrl = localStorage.getItem('profileImageUrl');
     }
 
     if (props.password > MAX_PASSWORD_LENGTH) {
@@ -50,11 +50,11 @@ const sendSignupData = async () => {
 
     // 응답이 성공적으로 왔을 경우
     if (response.status === HTTP_CREATED) {
-        localStorage.removeItem('profilePath');
+        localStorage.removeItem('profileImageUrl');
         location.href = '/html/login.html';
     } else {
         Dialog('회원 가입 실패', '잠시 뒤 다시 시도해 주세요', () => {});
-        localStorage.removeItem('profilePath');
+        localStorage.removeItem('profileImageUrl');
         location.href = '/html/signup.html';
     }
 };
@@ -241,7 +241,10 @@ const uploadProfileImage = () => {
                 if (!response.ok) throw new Error('서버 응답 오류');
 
                 const responseData = await response.json();
-                localStorage.setItem('profilePath', responseData.data.filePath);
+                localStorage.setItem(
+                    'profileImageUrl',
+                    responseData.data.profileImageUrl,
+                );
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
             }
