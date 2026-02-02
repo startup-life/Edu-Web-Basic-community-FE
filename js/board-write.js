@@ -5,6 +5,7 @@ import {
     getQueryString,
     getServerUrl,
     prependChild,
+    resolveImageUrl,
 } from '../utils/function.js';
 import {
     createPost,
@@ -188,8 +189,8 @@ const addEvent = () => {
 };
 
 const setModifyData = data => {
-    titleInput.value = data.post_title;
-    contentInput.value = data.post_content;
+    titleInput.value = data.title;
+    contentInput.value = data.content;
 
     if (data.filePath) {
         // filePath에서 파일 이름만 추출하여 표시
@@ -217,8 +218,8 @@ const setModifyData = data => {
         imagePreviewText.style.display = 'none';
     }
 
-    boardWrite.title = data.post_title;
-    boardWrite.content = data.post_content;
+    boardWrite.title = data.title;
+    boardWrite.content = data.content;
 
     observeSignupData();
 };
@@ -228,10 +229,10 @@ const init = async () => {
     const data = await dataResponse.json();
     const modifyId = checkModifyMode();
 
-    const profileImage =
-        data.data.profileImageUrl === undefined || data.data.profileImageUrl === null
-            ? DEFAULT_PROFILE_IMAGE
-            : `${getServerUrl()}${data.data.profileImageUrl}`;
+    const profileImage = resolveImageUrl(
+        data.data.profileImageUrl,
+        DEFAULT_PROFILE_IMAGE,
+    );
 
     prependChild(document.body, Header('커뮤니티', 1, profileImage));
 

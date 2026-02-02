@@ -5,6 +5,12 @@ export const getServerUrl = () => {
         : `http://${host}:3000`;
 };
 
+export const resolveImageUrl = (url, fallback = null) => {
+    if (!url) return fallback;
+    if (/^https?:\/\//i.test(url)) return url;
+    return `${getServerUrl()}${url}`;
+};
+
 export const serverSessionCheck = async () => {
     const res = await fetch(`${getServerUrl()}/auth/check`, {
         method: 'GET',

@@ -5,6 +5,7 @@ import {
     authCheck,
     prependChild,
     getServerUrl,
+    resolveImageUrl,
     validNickname,
 } from '../utils/function.js';
 import { userModify, userDelete } from '../api/modifyInfoRequest.js';
@@ -22,7 +23,6 @@ const modifyBtnElement = document.querySelector('#signupBtn');
 const profilePreview = document.querySelector('#profilePreview');
 const authDataReponse = await authCheck();
 const authData = await authDataReponse.json();
-const userId = authData.data.userId;
 const changeData = {
     nickname: authData.data.nickname,
     profileImageUrl: authData.data.profileImageUrl,
@@ -39,14 +39,17 @@ const setData = data => {
     ) {
         profilePreview.src = DEFAULT_PROFILE_IMAGE;
     } else {
-        profilePreview.src = `${getServerUrl()}${data.profileImageUrl}`;
+        profilePreview.src = resolveImageUrl(
+            data.profileImageUrl,
+            DEFAULT_PROFILE_IMAGE,
+        );
 
         const profileImageUrl = data.profileImageUrl;
         const fileName = profileImageUrl.split('/').pop();
         localStorage.setItem('profileImageUrl', data.profileImageUrl);
 
         const profileImage = new File(
-            [`${getServerUrl()}${profileImageUrl}`],
+            [resolveImageUrl(profileImageUrl)],
             fileName,
             { type: '' },
         );
@@ -135,7 +138,10 @@ const changeEventHandler = async (event, uid) => {
                     data.profileImageUrl,
                 );
                 changeData.profileImageUrl = data.profileImageUrl;
-                profilePreview.src = `${getServerUrl()}${data.profileImageUrl}`;
+                profilePreview.src = resolveImageUrl(
+                    data.profileImageUrl,
+                    DEFAULT_PROFILE_IMAGE,
+                );
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
             }
@@ -151,7 +157,7 @@ const sendModifyData = async () => {
         if (changeData.nickname === '') {
             Dialog('필수 정보 누락', '닉네임을 입력해주세요.');
         } else {
-            const { status } = await userModify(userId, changeData);
+            const { status } = await userModify(changeData);
 
             if (status === HTTP_CREATED) {
                 localStorage.removeItem('profileImageUrl');
@@ -169,7 +175,7 @@ const sendModifyData = async () => {
 // 회원 탈퇴
 const deleteAccount = async () => {
     const callback = async () => {
-        const { status } = await userDelete(userId);
+        const { status } = await userDelete();
 
         if (status === HTTP_OK) {
             try {
@@ -250,9 +256,7 @@ const displayToastFromStorage = () => {
 
 const init = () => {
     const profileImage =
-        authData.data.profileImageUrl === null || authData.data.profileImageUrl === undefined
-            ? DEFAULT_PROFILE_IMAGE
-            : `${getServerUrl()}${authData.data.profileImageUrl}`;
+        resolveImageUrl(authData.data.profileImageUrl, DEFAULT_PROFILE_IMAGE);
 
     prependChild(document.body, Header('커뮤니티', 2, profileImage));
     setData(authData.data);

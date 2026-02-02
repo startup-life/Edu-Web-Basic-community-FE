@@ -6,6 +6,7 @@ import {
     getServerUrl,
     prependChild,
     padTo2Digits,
+    resolveImageUrl,
 } from '../utils/function.js';
 import {
     getPost,
@@ -38,15 +39,15 @@ const setBoardDetail = data => {
     const imgElement = document.querySelector('.img');
     const nicknameElement = document.querySelector('.nickname');
 
-    titleElement.textContent = data.post_title;
+    titleElement.textContent = data.title;
     const date = new Date(data.created_at);
     const formattedDate = `${date.getFullYear()}-${padTo2Digits(date.getMonth() + 1)}-${padTo2Digits(date.getDate())} ${padTo2Digits(date.getHours())}:${padTo2Digits(date.getMinutes())}:${padTo2Digits(date.getSeconds())}`;
     createdAtElement.textContent = formattedDate;
 
-    imgElement.src =
-        data.profileImage === undefined || data.profileImage === null
-            ? DEFAULT_PROFILE_IMAGE
-            : `${getServerUrl()}${data.profileImage}`;
+    imgElement.src = resolveImageUrl(
+        data.profileImage,
+        DEFAULT_PROFILE_IMAGE,
+    );
 
     nicknameElement.textContent = data.nickname;
 
@@ -59,16 +60,16 @@ const setBoardDetail = data => {
         contentImgElement.appendChild(img);
     }
     const contentElement = document.querySelector('.content');
-    contentElement.textContent = data.post_content;
+    contentElement.textContent = data.content;
 
     const viewCountElement = document.querySelector('.viewCount h3');
     // hits에 K, M 이 포함되어 있을 경우 그냥 출력
     // 포함되어 있지 않다면 + 1
-    if (data.hits.includes('K') || data.hits.includes('M')) {
-        viewCountElement.textContent = data.hits;
+    if (data.view_count.includes('K') || data.view_count.includes('M')) {
+        viewCountElement.textContent = data.view_count;
     } else {
         viewCountElement.textContent = (
-            parseInt(data.hits, 10) + 1
+            parseInt(data.view_count, 10) + 1
         ).toLocaleString();
     }
 
@@ -181,10 +182,10 @@ const init = async () => {
         if (data.status === HTTP_NOT_AUTHORIZED) {
             window.location.href = '/html/login.html';
         }
-        const profileImage =
-            myInfo.profileImageUrl === undefined || myInfo.profileImageUrl === null
-                ? DEFAULT_PROFILE_IMAGE
-                : `${getServerUrl()}${myInfo.profileImageUrl}`;
+        const profileImage = resolveImageUrl(
+            myInfo.profileImageUrl,
+            DEFAULT_PROFILE_IMAGE,
+        );
 
         prependChild(document.body, Header('커뮤니티', 2, profileImage));
 

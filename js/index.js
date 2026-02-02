@@ -1,6 +1,6 @@
 import BoardItem from '../component/board/boardItem.js';
 import Header from '../component/header/header.js';
-import { authCheck, getServerUrl, prependChild } from '../utils/function.js';
+import { authCheck, getServerUrl, prependChild, resolveImageUrl } from '../utils/function.js';
 import { getPosts } from '../api/indexRequest.js';
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
@@ -26,12 +26,12 @@ const setBoardItem = boardData => {
                 BoardItem(
                     data.post_id,
                     data.created_at,
-                    data.post_title,
-                    data.hits,
+                    data.title,
+                    data.view_count,
                     data.profileImageUrl === null ? null : data.profileImageUrl,
                     data.nickname,
                     data.comment_count,
-                    data.like,
+                    data.like_count,
                 ),
             )
             .join('');
@@ -79,10 +79,10 @@ const init = async () => {
             return;
         }
 
-        const profileImageUrl =
-            data.data.profileImageUrl === null
-                ? DEFAULT_PROFILE_IMAGE
-                : `${getServerUrl()}${data.data.profileImageUrl}`;
+        const profileImageUrl = resolveImageUrl(
+            data.data.profileImageUrl,
+            DEFAULT_PROFILE_IMAGE,
+        );
 
         prependChild(
             document.body,

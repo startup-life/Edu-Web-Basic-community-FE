@@ -5,6 +5,7 @@ import {
     authCheck,
     getServerUrl,
     prependChild,
+    resolveImageUrl,
     validPassword,
 } from '../utils/function.js';
 
@@ -15,11 +16,10 @@ const HTTP_CREATED = 201;
 
 const dataResponse = await authCheck();
 const data = await dataResponse.json();
-const userId = data.data.userId;
-const profileImage =
-    data.data.profileImageUrl === undefined || data.data.profileImageUrl === null
-        ? DEFAULT_PROFILE_IMAGE
-        : `${getServerUrl()}${data.data.profileImageUrl}`;
+const profileImage = resolveImageUrl(
+    data.data.profileImageUrl,
+    DEFAULT_PROFILE_IMAGE,
+);
 
 const modifyData = {
     password: '',
@@ -96,7 +96,7 @@ const addEventForInputElements = () => {
 const modifyPassword = async () => {
     const { password } = modifyData;
 
-    const { status } = await changePassword(userId, password);
+    const { status } = await changePassword(password);
 
     if (status == HTTP_CREATED) {
         try {

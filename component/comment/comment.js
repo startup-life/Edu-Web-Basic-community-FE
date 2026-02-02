@@ -1,4 +1,4 @@
-import { getServerUrl, padTo2Digits } from '../../utils/function.js';
+import { resolveImageUrl, padTo2Digits } from '../../utils/function.js';
 import Dialog from '../dialog/dialog.js';
 import { deleteComment, updateComment } from '../../api/commentRequest.js';
 
@@ -93,7 +93,7 @@ const CommentItem = (data, writerId, postId, commentId) => {
 
     const img = document.createElement('img');
     img.className = 'commentImg';
-    img.src = data.profileImage === null ? DEFAULT_PROFILE_IMAGE : `${getServerUrl()}${data.profileImage}`
+    img.src = resolveImageUrl(data.profileImage, DEFAULT_PROFILE_IMAGE);
     picture.appendChild(img);
 
     const commentInfoWrap = document.createElement('div');
@@ -128,7 +128,7 @@ const CommentItem = (data, writerId, postId, commentId) => {
     }
 
     const p = document.createElement('p');
-    p.innerHTML = data.comment_content.replace(/(?:\r\n|\r|\n)/g, '<br>');
+    p.innerHTML = data.content.replace(/(?:\r\n|\r|\n)/g, '<br>');
 
     commentInfoWrap.appendChild(infoDiv);
     commentInfoWrap.appendChild(p);
