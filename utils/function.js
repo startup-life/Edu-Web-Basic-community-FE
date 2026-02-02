@@ -12,7 +12,7 @@ export const resolveImageUrl = (url, fallback = null) => {
 };
 
 export const serverSessionCheck = async () => {
-    const res = await fetch(`${getServerUrl()}/auth/check`, {
+    const res = await fetch(`${getServerUrl()}/v1/auth/check`, {
         method: 'GET',
         credentials: 'include',
     });
