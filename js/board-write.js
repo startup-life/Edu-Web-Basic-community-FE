@@ -72,14 +72,12 @@ const addBoard = async () => {
         return Dialog('게시글', '제목은 26자 이하로 입력해주세요.');
 
     if (!isModifyMode) {
-        const response = await createPost(boardData);
-        if (!response.ok) throw new Error('서버 응답 오류');
+        const { ok, status, data } = await createPost(boardData);
+        if (!ok) throw new Error('서버 응답 오류');
 
-        const data = await response.json();
-
-        if (response.status === HTTP_CREATED) {
+        if (status === HTTP_CREATED) {
             localStorage.removeItem('postFilePath');
-            window.location.href = `/html/board.html?id=${data.data.insertId}`;
+            window.location.href = `/html/board.html?id=${data.insertId}`;
         } else {
             const helperElement = contentHelpElement;
             helperElement.textContent = '제목, 내용을 모두 작성해주세요.';
@@ -91,10 +89,10 @@ const addBoard = async () => {
             ...boardData,
         };
 
-        const response = await updatePost(post_id, setData);
-        if (!response.ok) throw new Error('서버 응답 오류');
+        const { ok, status } = await updatePost(post_id, setData);
+        if (!ok) throw new Error('서버 응답 오류');
 
-        if (response.status === HTTP_OK) {
+        if (status === HTTP_OK) {
             localStorage.removeItem('postFilePath');
             window.location.href = `/html/board.html?id=${post_id}`;
         } else {
@@ -143,11 +141,9 @@ const changeEventHandler = async (event, uid) => {
 
         // 파일 업로드를 위한 POST 요청 실행
         try {
-            const response = await fileUpload(formData);
-            if (!response.ok) throw new Error('서버 응답 오류');
-
-            const result = await response.json(); // 응답을 JSON으로 변환
-            localStorage.setItem('postFilePath', result.data.filePath);
+            const { ok, data } = await fileUpload(formData);
+            if (!ok) throw new Error('서버 응답 오류');
+            localStorage.setItem('postFilePath', data.filePath);
         } catch (error) {
             console.error('업로드 중 오류 발생:', error);
         }
@@ -160,11 +156,9 @@ const changeEventHandler = async (event, uid) => {
 };
 // 수정모드시 사용하는 게시글 단건 정보 가져오기
 const getBoardModifyData = async postId => {
-    const response = await getBoardItem(postId);
-    if (!response.ok) throw new Error('서버 응답 오류');
-
-    const data = await response.json();
-    return data.data;
+    const { ok, data } = await getBoardItem(postId);
+    if (!ok) throw new Error('서버 응답 오류');
+    return data;
 };
 
 // 수정 모드인지 확인

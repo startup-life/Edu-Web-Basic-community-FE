@@ -6,7 +6,7 @@ export const getServerUrl = () => {
 };
 
 export const serverSessionCheck = async () => {
-    const res = await fetch(`${getServerUrl()}/users/auth/check`, {
+    const res = await fetch(`${getServerUrl()}/auth/check`, {
         method: 'GET',
         credentials: 'include',
     });

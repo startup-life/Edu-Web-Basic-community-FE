@@ -11,13 +11,13 @@ const CommentItem = (data, writerId, postId, commentId) => {
             '댓글을 삭제하시겠습니까?',
             '삭제한 내용은 복구 할 수 없습니다.',
             async () => {
-                const response = await deleteComment(postId, commentId);
-                if (!response.ok) {
+                const { ok, status } = await deleteComment(postId, commentId);
+                if (!ok) {
                     Dialog('삭제 실패', '댓글 삭제에 실패하였습니다.');
                     return;
                 }
 
-                if (response.status === HTTP_OK)
+                if (status === HTTP_OK)
                     location.href = '/html/board.html?id=' + postId;
             },
         );
@@ -60,8 +60,8 @@ const CommentItem = (data, writerId, postId, commentId) => {
                 commentContent: updatedContent,
             };
 
-            const response = await updateComment(postId, commentId, sendData);
-            if (!response.ok)
+            const { ok } = await updateComment(postId, commentId, sendData);
+            if (!ok)
                 return Dialog('수정 실패', '댓글 수정에 실패하였습니다.');
 
             location.href = '/html/board.html?id=' + postId;

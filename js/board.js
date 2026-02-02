@@ -25,12 +25,10 @@ const getQueryString = name => {
 };
 
 const getBoardDetail = async postId => {
-    const response = await getPost(postId);
-    if (!response.ok)
+    const { ok, data } = await getPost(postId);
+    if (!ok)
         return new Error('게시글 정보를 가져오는데 실패하였습니다.');
-
-    const data = await response.json();
-    return data.data;
+    return data;
 };
 
 const setBoardDetail = data => {
@@ -90,8 +88,8 @@ const setBoardModify = async (data, myInfo) => {
                 '게시글을 삭제하시겠습니까?',
                 '삭제한 내용은 복구 할 수 없습니다.',
                 async () => {
-                    const response = await deletePost(postId);
-                    if (response.ok) {
+                    const { ok } = await deletePost(postId);
+                    if (ok) {
                         window.location.href = '/';
                     } else {
                         Dialog('삭제 실패', '게시글 삭제에 실패하였습니다.');
@@ -108,11 +106,10 @@ const setBoardModify = async (data, myInfo) => {
 };
 
 const getBoardComment = async id => {
-    const response = await getComments(id);
-    if (!response.ok) return [];
-    const data = await response.json();
-    if (response.status !== HTTP_OK) return [];
-    return data.data;
+    const { ok, status, data } = await getComments(id);
+    if (!ok) return [];
+    if (status !== HTTP_OK) return [];
+    return data;
 };
 
 const setBoardComment = (data, myInfo) => {
@@ -134,9 +131,9 @@ const addComment = async () => {
     const comment = document.querySelector('textarea').value;
     const pageId = getQueryString('id');
 
-    const response = await writeComment(pageId, comment);
+    const { ok } = await writeComment(pageId, comment);
 
-    if (response.ok) {
+    if (ok) {
         window.location.reload();
     } else {
         Dialog('댓글 등록 실패', '댓글 등록에 실패하였습니다.');

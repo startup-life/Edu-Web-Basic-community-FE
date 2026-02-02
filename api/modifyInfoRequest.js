@@ -1,7 +1,8 @@
 import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const userModify = async (userId, changeData) => {
-    const result = await fetch(`${getServerUrl()}/users/${userId}`, {
+    const result = await requestJson(`${getServerUrl()}/users/${userId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -13,7 +14,7 @@ export const userModify = async (userId, changeData) => {
 };
 
 export const userDelete = async userId => {
-    const result = await fetch(`${getServerUrl()}/users/${userId}`, {
+    const result = await requestJson(`${getServerUrl()}/users/${userId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',

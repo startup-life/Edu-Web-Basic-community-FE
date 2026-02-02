@@ -1,7 +1,8 @@
 import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const userLogin = async (email, password) => {
-    const result = await fetch(`${getServerUrl()}/users/login`, {
+    const result = await requestJson(`${getServerUrl()}/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -12,18 +13,5 @@ export const userLogin = async (email, password) => {
             password: password,
         }),
     });
-    return result;
-};
-
-export const checkEmail = async email => {
-    const result = fetch(
-        `${getServerUrl()}/users/nickname/check?nickname=${email}`,
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        },
-    );
     return result;
 };

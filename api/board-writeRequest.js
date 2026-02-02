@@ -1,7 +1,8 @@
 import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const createPost = boardData => {
-    const result = fetch(`${getServerUrl()}/posts`, {
+    const result = requestJson(`${getServerUrl()}/posts`, {
         method: 'POST',
         body: JSON.stringify(boardData),
         headers: {
@@ -13,7 +14,7 @@ export const createPost = boardData => {
 };
 
 export const updatePost = (postId, boardData) => {
-    const result = fetch(`${getServerUrl()}/posts/${postId}`, {
+    const result = requestJson(`${getServerUrl()}/posts/${postId}`, {
         method: 'PATCH',
         body: JSON.stringify(boardData),
         headers: {
@@ -26,7 +27,7 @@ export const updatePost = (postId, boardData) => {
 };
 
 export const fileUpload = formData => {
-    const result = fetch(getServerUrl() + '/posts/upload/attach-file', {
+    const result = requestJson(getServerUrl() + '/posts/upload/attach-file', {
         method: 'POST',
         body: formData,
     });
@@ -35,7 +36,7 @@ export const fileUpload = formData => {
 };
 
 export const getBoardItem = postId => {
-    const result = fetch(getServerUrl() + `/posts/${postId}`, {
+    const result = requestJson(getServerUrl() + `/posts/${postId}`, {
         method: 'GET',
         credentials: 'include',
     });

@@ -46,14 +46,22 @@ const sendSignupData = async () => {
         return;
     }
     // signupData를 서버로 전송
-    const response = await userSignup(props);
+    const { status, code } = await userSignup(props);
 
     // 응답이 성공적으로 왔을 경우
-    if (response.status === HTTP_CREATED) {
+    if (status === HTTP_CREATED) {
         localStorage.removeItem('profileImageUrl');
         location.href = '/html/login.html';
     } else {
-        Dialog('회원 가입 실패', '잠시 뒤 다시 시도해 주세요', () => {});
+        if (code === 'ALREADY_EXIST_EMAIL') {
+            Dialog('회원 가입 실패', '이미 사용 중인 이메일입니다.');
+        } else if (code === 'ALREADY_EXIST_NICKNAME') {
+            Dialog('회원 가입 실패', '이미 사용 중인 닉네임입니다.');
+        } else if (code === 'INVALID_INPUT') {
+            Dialog('회원 가입 실패', '입력값을 확인해주세요.');
+        } else {
+            Dialog('회원 가입 실패', '잠시 뒤 다시 시도해 주세요', () => {});
+        }
         localStorage.removeItem('profileImageUrl');
         location.href = '/html/signup.html';
     }
@@ -95,8 +103,8 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*올바른 이메일 주소 형식을 입력해주세요. (예: example@example.com)';
         } else {
-            const response = await checkEmail(value);
-            if (response.status === HTTP_OK) {
+            const { status } = await checkEmail(value);
+            if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else {
@@ -166,9 +174,9 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임에 특수 문자는 사용할 수 없습니다.';
         } else {
-            const response = await checkNickname(value);
+            const { status } = await checkNickname(value);
 
-            if (response.status === HTTP_OK) {
+            if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else {
@@ -237,13 +245,11 @@ const uploadProfileImage = () => {
 
             // 파일 업로드를 위한 POST 요청 실행
             try {
-                const response = await fileUpload(formData);
-                if (!response.ok) throw new Error('서버 응답 오류');
-
-                const responseData = await response.json();
+                const { ok, data } = await fileUpload(formData);
+                if (!ok) throw new Error('서버 응답 오류');
                 localStorage.setItem(
                     'profileImageUrl',
-                    responseData.data.profileImageUrl,
+                    data.profileImageUrl,
                 );
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);

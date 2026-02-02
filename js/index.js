@@ -11,13 +11,11 @@ const ITEMS_PER_LOAD = 5;
 
 // getBoardItem 함수
 const getBoardItem = async (offset = 0, limit = 5) => {
-    const response = await getPosts(offset, limit);
-    if (!response.ok) {
+    const { ok, data } = await getPosts(offset, limit);
+    if (!ok) {
         throw new Error('Failed to load post list.');
     }
-
-    const data = await response.json();
-    return data.data;
+    return data;
 };
 
 const setBoardItem = boardData => {

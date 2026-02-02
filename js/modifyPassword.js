@@ -96,11 +96,11 @@ const addEventForInputElements = () => {
 const modifyPassword = async () => {
     const { password } = modifyData;
 
-    const response = await changePassword(userId, password);
+    const { status } = await changePassword(userId, password);
 
-    if (response.status == HTTP_CREATED) {
+    if (status == HTTP_CREATED) {
         try {
-            await fetch(`${getServerUrl()}/users/logout`, {
+            await fetch(`${getServerUrl()}/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });

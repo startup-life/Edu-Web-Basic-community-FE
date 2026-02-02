@@ -1,14 +1,15 @@
 import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const getPost = postId => {
-    const result = fetch(`${getServerUrl()}/posts/${postId}`, {
+    const result = requestJson(`${getServerUrl()}/posts/${postId}`, {
         credentials: 'include',
     });
     return result;
 };
 
 export const deletePost = async postId => {
-    const result = await fetch(`${getServerUrl()}/posts/${postId}`, {
+    const result = await requestJson(`${getServerUrl()}/posts/${postId}`, {
         method: 'DELETE',
         credentials: 'include',
     });
@@ -16,7 +17,7 @@ export const deletePost = async postId => {
 };
 
 export const writeComment = async (pageId, comment) => {
-    const result = await fetch(`${getServerUrl()}/posts/${pageId}/comments`, {
+    const result = await requestJson(`${getServerUrl()}/posts/${pageId}/comments`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -28,7 +29,7 @@ export const writeComment = async (pageId, comment) => {
 };
 
 export const getComments = async postId => {
-    const result = await fetch(`${getServerUrl()}/posts/${postId}/comments`, {
+    const result = await requestJson(`${getServerUrl()}/posts/${postId}/comments`, {
         credentials: 'include',
     });
     return result;

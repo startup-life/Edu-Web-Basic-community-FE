@@ -1,4 +1,4 @@
-import { checkEmail } from '../api/loginRequest.js';
+import { checkNickname } from '../api/signupRequest.js';
 import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import {
@@ -8,6 +8,7 @@ import {
     validNickname,
 } from '../utils/function.js';
 import { userModify, userDelete } from '../api/modifyInfoRequest.js';
+import { requestJson } from '../utils/request.js';
 
 const emailTextElement = document.querySelector('#id');
 const nicknameInputElement = document.querySelector('#nickname');
@@ -85,8 +86,8 @@ const changeEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임은 2~10자의 영문자, 한글 또는 숫자만 사용할 수 있습니다. 특수 문자와 띄어쓰기는 사용할 수 없습니다.';
         } else {
-            const response = await checkEmail(value);
-            if (response.status === HTTP_OK) {
+            const { status } = await checkNickname(value);
+            if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else if (authData.data.nickname === value) {
@@ -120,7 +121,7 @@ const changeEventHandler = async (event, uid) => {
 
             // 파일 업로드를 위한 POST 요청 실행
             try {
-                const response = await fetch(
+                const { ok, data } = await requestJson(
                     `${getServerUrl()}/users/upload/profile-image`,
                     {
                         method: 'POST',
@@ -128,15 +129,13 @@ const changeEventHandler = async (event, uid) => {
                     },
                 );
 
-                if (!response.ok) throw new Error('서버 응답 오류');
-
-                const result = await response.json(); // 응답을 JSON으로 변환
+                if (!ok) throw new Error('서버 응답 오류');
                 localStorage.setItem(
                     'profileImageUrl',
-                    result.data.profileImageUrl,
+                    data.profileImageUrl,
                 );
-                changeData.profileImageUrl = result.data.profileImageUrl;
-                profilePreview.src = `${getServerUrl()}${result.data.profileImageUrl}`;
+                changeData.profileImageUrl = data.profileImageUrl;
+                profilePreview.src = `${getServerUrl()}${data.profileImageUrl}`;
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
             }
@@ -152,9 +151,9 @@ const sendModifyData = async () => {
         if (changeData.nickname === '') {
             Dialog('필수 정보 누락', '닉네임을 입력해주세요.');
         } else {
-            const response = await userModify(userId, changeData);
+            const { status } = await userModify(userId, changeData);
 
-            if (response.status === HTTP_CREATED) {
+            if (status === HTTP_CREATED) {
                 localStorage.removeItem('profileImageUrl');
                 saveToastMessage('수정완료');
                 location.href = '/html/modifyInfo.html';
@@ -170,11 +169,11 @@ const sendModifyData = async () => {
 // 회원 탈퇴
 const deleteAccount = async () => {
     const callback = async () => {
-        const response = await userDelete(userId);
+        const { status } = await userDelete(userId);
 
-        if (response.status === HTTP_OK) {
+        if (status === HTTP_OK) {
             try {
-                await fetch(`${getServerUrl()}/users/logout`, {
+                await requestJson(`${getServerUrl()}/auth/logout`, {
                     method: 'POST',
                     credentials: 'include',
                 });
