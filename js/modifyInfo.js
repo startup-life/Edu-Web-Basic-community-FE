@@ -21,6 +21,7 @@ const nicknameHelpElement = document.querySelector(
 const resultElement = document.querySelector('.inputBox p[name="result"]');
 const modifyBtnElement = document.querySelector('#signupBtn');
 const profilePreview = document.querySelector('#profilePreview');
+const removeProfileButton = document.querySelector('#removeProfileButton');
 const authDataReponse = await authCheck();
 const authData = await authDataReponse.json();
 const changeData = {
@@ -38,11 +39,13 @@ const setData = data => {
         data.profileImageUrl === null
     ) {
         profilePreview.src = DEFAULT_PROFILE_IMAGE;
+        if (removeProfileButton) removeProfileButton.style.display = 'none';
     } else {
         profilePreview.src = resolveImageUrl(
             data.profileImageUrl,
             DEFAULT_PROFILE_IMAGE,
         );
+        if (removeProfileButton) removeProfileButton.style.display = 'flex';
 
         const profileImageUrl = data.profileImageUrl;
         const fileName = profileImageUrl.split('/').pop();
@@ -118,6 +121,7 @@ const changeEventHandler = async (event, uid) => {
             localStorage.removeItem('profileImageUrl');
             profilePreview.src = DEFAULT_PROFILE_IMAGE;
             changeData.profileImageUrl = null;
+            if (removeProfileButton) removeProfileButton.style.display = 'none';
         } else {
             const formData = new FormData();
             formData.append('profileImage', file);
@@ -142,6 +146,8 @@ const changeEventHandler = async (event, uid) => {
                     data.profileImageUrl,
                     DEFAULT_PROFILE_IMAGE,
                 );
+                if (removeProfileButton)
+                    removeProfileButton.style.display = 'flex';
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
             }
@@ -206,6 +212,16 @@ const addEvent = () => {
     profileInputElement.addEventListener('change', event =>
         changeEventHandler(event, 'profile'),
     );
+    if (removeProfileButton) {
+        removeProfileButton.addEventListener('click', () => {
+            localStorage.removeItem('profileImageUrl');
+            profilePreview.src = DEFAULT_PROFILE_IMAGE;
+            changeData.profileImageUrl = null;
+            profileInputElement.value = '';
+            removeProfileButton.style.display = 'none';
+            observeData();
+        });
+    }
     modifyBtnElement.addEventListener('click', async () => sendModifyData());
     withdrawBtnElement.addEventListener('click', async () => deleteAccount());
 };
