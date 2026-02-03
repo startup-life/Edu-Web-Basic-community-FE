@@ -85,17 +85,17 @@ const addBoard = async () => {
         }
     } else {
         // 게시글 작성 api 호출
-        const post_id = getQueryString('post_id');
+        const postId = getQueryString('postId');
         const setData = {
             ...boardData,
         };
 
-        const { ok, status } = await updatePost(post_id, setData);
+        const { ok, status } = await updatePost(postId, setData);
         if (!ok) throw new Error('서버 응답 오류');
 
         if (status === HTTP_OK) {
             localStorage.removeItem('postFileUrl');
-            window.location.href = `/html/board.html?id=${post_id}`;
+            window.location.href = `/html/board.html?id=${postId}`;
         } else {
             Dialog('게시글', '게시글 수정 실패');
         }
@@ -164,7 +164,7 @@ const getBoardModifyData = async postId => {
 
 // 수정 모드인지 확인
 const checkModifyMode = () => {
-    const postId = getQueryString('post_id');
+    const postId = getQueryString('postId');
     if (!postId) return false;
     return postId;
 };
