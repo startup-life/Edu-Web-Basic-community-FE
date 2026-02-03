@@ -13,12 +13,27 @@ import {
     deletePost,
     writeComment,
     getComments,
+    likePost,
+    unlikePost,
 } from '../api/boardRequest.js';
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
 const MAX_COMMENT_LENGTH = 1000;
 const HTTP_NOT_AUTHORIZED = 401;
 const HTTP_OK = 200;
+
+const formatCount = value => {
+    const count = Number(value);
+    if (!Number.isFinite(count)) return value ?? '';
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toLocaleString();
+};
+
+const setLikeButtonState = (button, isLiked) => {
+    button.classList.toggle('is-active', isLiked);
+    button.setAttribute('aria-pressed', isLiked ? 'true' : 'false');
+};
 
 const getQueryString = name => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -62,6 +77,65 @@ const setBoardDetail = data => {
     }
     const contentElement = document.querySelector('.content');
     contentElement.textContent = data.content;
+
+    const likeButtonElement = document.querySelector('.likeButton');
+    const likeCountElement = likeButtonElement.querySelector('h3');
+    let isLiked = Boolean(data.isLiked);
+    let isLikeLoading = false;
+
+    likeCountElement.textContent = formatCount(data.likeCount);
+    setLikeButtonState(likeButtonElement, isLiked);
+
+    likeButtonElement.addEventListener('click', async () => {
+        if (isLikeLoading) return;
+        isLikeLoading = true;
+
+        try {
+            if (!isLiked) {
+                const { ok, status, code, data: likeData } = await likePost(
+                    data.id,
+                );
+                if (ok) {
+                    isLiked = true;
+                    setLikeButtonState(likeButtonElement, isLiked);
+                    if (likeData && likeData.likeCount !== undefined) {
+                        likeCountElement.textContent = formatCount(
+                            likeData.likeCount,
+                        );
+                    }
+                } else if (status === 409 && code === 'POST_ALREADY_LIKED') {
+                    isLiked = true;
+                    setLikeButtonState(likeButtonElement, isLiked);
+                } else if (status === HTTP_NOT_AUTHORIZED) {
+                    window.location.href = '/html/login.html';
+                } else {
+                    Dialog('좋아요 실패', '좋아요 처리에 실패하였습니다.');
+                }
+            } else {
+                const { ok, status, code, data: likeData } = await unlikePost(
+                    data.id,
+                );
+                if (ok) {
+                    isLiked = false;
+                    setLikeButtonState(likeButtonElement, isLiked);
+                    if (likeData && likeData.likeCount !== undefined) {
+                        likeCountElement.textContent = formatCount(
+                            likeData.likeCount,
+                        );
+                    }
+                } else if (status === 409 && code === 'POST_ALREADY_UNLIKED') {
+                    isLiked = false;
+                    setLikeButtonState(likeButtonElement, isLiked);
+                } else if (status === HTTP_NOT_AUTHORIZED) {
+                    window.location.href = '/html/login.html';
+                } else {
+                    Dialog('좋아요 취소 실패', '좋아요 취소에 실패하였습니다.');
+                }
+            }
+        } finally {
+            isLikeLoading = false;
+        }
+    });
 
     const viewCountElement = document.querySelector('.viewCount h3');
     // hits에 K, M 이 포함되어 있을 경우 그냥 출력

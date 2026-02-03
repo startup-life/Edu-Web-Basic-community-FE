@@ -10,3 +10,18 @@ export const getPosts = (offset, limit) => {
     );
     return result;
 };
+
+export const searchPosts = (keyword, offset = 0, limit = 5) => {
+    const query = new URLSearchParams({
+        keyword,
+        offset,
+        limit,
+    });
+    const result = requestJson(
+        `${getServerUrl()}/v1/posts/search?${query.toString()}`,
+        {
+            credentials: 'include',
+        },
+    );
+    return result;
+};
