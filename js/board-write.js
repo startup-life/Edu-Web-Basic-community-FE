@@ -53,8 +53,8 @@ const observeSignupData = () => {
 // 엘리먼트 값 가져오기 title, content
 const getBoardData = () => {
     return {
-        postTitle: boardWrite.title,
-        postContent: boardWrite.content,
+        title: boardWrite.title,
+        content: boardWrite.content,
         attachFilePath:
             localStorage.getItem('postFilePath') === null
                 ? undefined
@@ -69,7 +69,7 @@ const addBoard = async () => {
     // boardData가 false일 경우 함수 종료
     if (!boardData) return Dialog('게시글', '게시글을 입력해주세요.');
 
-    if (boardData.postTitle.length > MAX_TITLE_LENGTH)
+    if (boardData.title.length > MAX_TITLE_LENGTH)
         return Dialog('게시글', '제목은 26자 이하로 입력해주세요.');
 
     if (!isModifyMode) {

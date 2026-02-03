@@ -101,7 +101,7 @@ const setBoardModify = async (data, myInfo) => {
 
         const modifyBtnElement2 = document.querySelector('#modifyBtn');
         modifyBtnElement2.addEventListener('click', () => {
-            window.location.href = `/html/board-modify.html?post_id=${data.post_id}`;
+            window.location.href = `/html/board-modify.html?post_id=${data.id}`;
         });
     }
 };

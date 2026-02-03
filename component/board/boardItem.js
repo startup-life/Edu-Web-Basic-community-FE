@@ -3,7 +3,7 @@ import { padTo2Digits, resolveImageUrl } from '../../utils/function.js';
 const BoardItem = (
     postId,
     date,
-    postTitle,
+    title,
     viewCount,
     imgUrl,
     writer,
@@ -13,7 +13,7 @@ const BoardItem = (
     // 파라미터 값이 없으면 리턴
     if (
         !date ||
-        !postTitle ||
+        !title ||
         viewCount === undefined ||
         likeCount === undefined ||
         commentCount === undefined ||
@@ -40,7 +40,7 @@ const BoardItem = (
     return `
     <a href="/html/board.html?id=${postId}">
         <div class="boardItem">
-            <h2 class="title">${postTitle}</h2>
+            <h2 class="title">${title}</h2>
             <div class="info">
                 <h3 class="views">좋아요 <b>${likeCount}</b></h3>
                 <h3 class="views">댓글 <b>${commentCount}</b></h3>

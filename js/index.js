@@ -24,14 +24,14 @@ const setBoardItem = boardData => {
         const itemsHtml = boardData
             .map(data =>
                 BoardItem(
-                    data.post_id,
-                    data.created_at,
+                    data.id,
+                    data.createdAt,
                     data.title,
-                    data.view_count,
-                    data.profileImageUrl === null ? null : data.profileImageUrl,
-                    data.nickname,
-                    data.comment_count,
-                    data.like_count,
+                    data.viewCount,
+                    data.author ? data.author.profileImageUrl : null,
+                    data.author ? data.author.nickname : null,
+                    data.commentCount,
+                    data.likeCount,
                 ),
             )
             .join('');
