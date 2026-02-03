@@ -121,8 +121,8 @@ const setBoardComment = (data, myInfo) => {
             const item = CommentItem(
                 event,
                 myInfo.userId,
-                event.post_id,
-                event.comment_id,
+                event.postId,
+                event.id,
             );
             commentListElement.appendChild(item);
         });

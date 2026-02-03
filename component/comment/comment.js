@@ -93,7 +93,10 @@ const CommentItem = (data, writerId, postId, commentId) => {
 
     const img = document.createElement('img');
     img.className = 'commentImg';
-    img.src = resolveImageUrl(data.profileImage, DEFAULT_PROFILE_IMAGE);
+    img.src = resolveImageUrl(
+        data.author && data.author.profileImageUrl,
+        DEFAULT_PROFILE_IMAGE,
+    );
     picture.appendChild(img);
 
     const commentInfoWrap = document.createElement('div');
@@ -102,16 +105,19 @@ const CommentItem = (data, writerId, postId, commentId) => {
     const infoDiv = document.createElement('div');
 
     const h3 = document.createElement('h3');
-    h3.textContent = data.nickname;
+    h3.textContent = data.author ? data.author.nickname : '';
     infoDiv.appendChild(h3);
 
     const h4 = document.createElement('h4');
-    const date = new Date(data.created_at);
+    const date = new Date(data.createdAt);
     const formattedDate = `${date.getFullYear()}-${padTo2Digits(date.getMonth() + 1)}-${padTo2Digits(date.getDate())} ${padTo2Digits(date.getHours())}:${padTo2Digits(date.getMinutes())}:${padTo2Digits(date.getSeconds())}`;
     h4.textContent = formattedDate;
     infoDiv.appendChild(h4);
 
-    if (parseInt(data.user_id, 10) === parseInt(writerId, 10)) {
+    if (
+        data.author &&
+        parseInt(data.author.userId, 10) === parseInt(writerId, 10)
+    ) {
         const buttonWrap = document.createElement('span');
 
         const deleteButton = document.createElement('button');
