@@ -1,34 +1,33 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const createPost = boardData => {
-    const result = fetch(`${getServerUrl()}/posts`, {
+    const result = requestJson(`${getServerUrl()}/v1/posts`, {
         method: 'POST',
         body: JSON.stringify(boardData),
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: getCookie('userId'),
         },
+        credentials: 'include',
     });
     return result;
 };
 
 export const updatePost = (postId, boardData) => {
-    const result = fetch(`${getServerUrl()}/posts/${postId}`, {
+    const result = requestJson(`${getServerUrl()}/v1/posts/${postId}`, {
         method: 'PATCH',
         body: JSON.stringify(boardData),
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: getCookie('userId'),
         },
+        credentials: 'include',
     });
 
     return result;
 };
 
 export const fileUpload = formData => {
-    const result = fetch(getServerUrl() + '/posts/upload/attach-file', {
+    const result = requestJson(getServerUrl() + '/v1/posts/upload/attach-file', {
         method: 'POST',
         body: formData,
     });
@@ -37,13 +36,9 @@ export const fileUpload = formData => {
 };
 
 export const getBoardItem = postId => {
-    const result = fetch(getServerUrl() + `/posts/${postId}`, {
+    const result = requestJson(getServerUrl() + `/v1/posts/${postId}`, {
         method: 'GET',
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
-        noCORS: true,
+        credentials: 'include',
     });
 
     return result;

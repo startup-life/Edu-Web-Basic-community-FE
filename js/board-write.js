@@ -5,6 +5,7 @@ import {
     getQueryString,
     getServerUrl,
     prependChild,
+    resolveImageUrl,
 } from '../utils/function.js';
 import {
     createPost,
@@ -52,12 +53,12 @@ const observeSignupData = () => {
 // 엘리먼트 값 가져오기 title, content
 const getBoardData = () => {
     return {
-        postTitle: boardWrite.title,
-        postContent: boardWrite.content,
-        attachFilePath:
-            localStorage.getItem('postFilePath') === null
+        title: boardWrite.title,
+        content: boardWrite.content,
+        attachFileUrl:
+            localStorage.getItem('postFileUrl') === null
                 ? undefined
-                : localStorage.getItem('postFilePath'),
+                : localStorage.getItem('postFileUrl'),
     };
 };
 
@@ -68,35 +69,33 @@ const addBoard = async () => {
     // boardData가 false일 경우 함수 종료
     if (!boardData) return Dialog('게시글', '게시글을 입력해주세요.');
 
-    if (boardData.postTitle.length > MAX_TITLE_LENGTH)
+    if (boardData.title.length > MAX_TITLE_LENGTH)
         return Dialog('게시글', '제목은 26자 이하로 입력해주세요.');
 
     if (!isModifyMode) {
-        const response = await createPost(boardData);
-        if (!response.ok) throw new Error('서버 응답 오류');
+        const { ok, status, data } = await createPost(boardData);
+        if (!ok) throw new Error('서버 응답 오류');
 
-        const data = await response.json();
-
-        if (response.status === HTTP_CREATED) {
-            localStorage.removeItem('postFilePath');
-            window.location.href = `/html/board.html?id=${data.data.insertId}`;
+        if (status === HTTP_CREATED) {
+            localStorage.removeItem('postFileUrl');
+            window.location.href = `/html/board.html?id=${data.insertId}`;
         } else {
             const helperElement = contentHelpElement;
             helperElement.textContent = '제목, 내용을 모두 작성해주세요.';
         }
     } else {
         // 게시글 작성 api 호출
-        const post_id = getQueryString('post_id');
+        const postId = getQueryString('postId');
         const setData = {
             ...boardData,
         };
 
-        const response = await updatePost(post_id, setData);
-        if (!response.ok) throw new Error('서버 응답 오류');
+        const { ok, status } = await updatePost(postId, setData);
+        if (!ok) throw new Error('서버 응답 오류');
 
-        if (response.status === HTTP_OK) {
-            localStorage.removeItem('postFilePath');
-            window.location.href = `/html/board.html?id=${post_id}`;
+        if (status === HTTP_OK) {
+            localStorage.removeItem('postFileUrl');
+            window.location.href = `/html/board.html?id=${postId}`;
         } else {
             Dialog('게시글', '게시글 수정 실패');
         }
@@ -143,16 +142,14 @@ const changeEventHandler = async (event, uid) => {
 
         // 파일 업로드를 위한 POST 요청 실행
         try {
-            const response = await fileUpload(formData);
-            if (!response.ok) throw new Error('서버 응답 오류');
-
-            const result = await response.json(); // 응답을 JSON으로 변환
-            localStorage.setItem('postFilePath', result.data.filePath);
+            const { ok, data } = await fileUpload(formData);
+            if (!ok) throw new Error('서버 응답 오류');
+            localStorage.setItem('postFileUrl', data.fileUrl);
         } catch (error) {
             console.error('업로드 중 오류 발생:', error);
         }
     } else if (uid === 'imagePreviewText') {
-        localStorage.removeItem('postFilePath');
+        localStorage.removeItem('postFileUrl');
         imagePreviewText.style.display = 'none';
     }
 
@@ -160,16 +157,14 @@ const changeEventHandler = async (event, uid) => {
 };
 // 수정모드시 사용하는 게시글 단건 정보 가져오기
 const getBoardModifyData = async postId => {
-    const response = await getBoardItem(postId);
-    if (!response.ok) throw new Error('서버 응답 오류');
-
-    const data = await response.json();
-    return data.data;
+    const { ok, data } = await getBoardItem(postId);
+    if (!ok) throw new Error('서버 응답 오류');
+    return data;
 };
 
 // 수정 모드인지 확인
 const checkModifyMode = () => {
-    const postId = getQueryString('post_id');
+    const postId = getQueryString('postId');
     if (!postId) return false;
     return postId;
 };
@@ -194,21 +189,22 @@ const addEvent = () => {
 };
 
 const setModifyData = data => {
-    titleInput.value = data.post_title;
-    contentInput.value = data.post_content;
+    titleInput.value = data.title;
+    contentInput.value = data.content;
 
-    if (data.filePath) {
-        // filePath에서 파일 이름만 추출하여 표시
-        const fileName = data.filePath.split('/').pop();
+    const fileUrl = data.fileUrl || resolveImageUrl(data.filePath);
+    if (fileUrl) {
+        // fileUrl에서 파일 이름만 추출하여 표시
+        const fileName = fileUrl.split('/').pop();
         imagePreviewText.innerHTML =
             fileName + `<span class="deleteFile">X</span>`;
         imagePreviewText.style.display = 'block';
-        localStorage.setItem('postFilePath', data.filePath);
+        localStorage.setItem('postFileUrl', fileUrl);
 
         // 이제 추출된 파일명을 사용하여 File 객체를 생성
         const attachFile = new File(
             // 실제 이미지 데이터 대신 URL을 사용
-            [`${getServerUrl()}${data.filePath}`],
+            [fileUrl],
             // 추출된 파일명
             fileName,
             // MIME 타입 지정, 실제 이미지 타입에 맞게 조정 필요
@@ -223,8 +219,8 @@ const setModifyData = data => {
         imagePreviewText.style.display = 'none';
     }
 
-    boardWrite.title = data.post_title;
-    boardWrite.content = data.post_content;
+    boardWrite.title = data.title;
+    boardWrite.content = data.content;
 
     observeSignupData();
 };
@@ -234,10 +230,10 @@ const init = async () => {
     const data = await dataResponse.json();
     const modifyId = checkModifyMode();
 
-    const profileImage =
-        data.data.profileImagePath === undefined || data.data.profileImagePath === null
-            ? DEFAULT_PROFILE_IMAGE
-            : `${getServerUrl()}${data.data.profileImagePath}`;
+    const profileImage = resolveImageUrl(
+        data.data.profileImageUrl,
+        DEFAULT_PROFILE_IMAGE,
+    );
 
     prependChild(document.body, Header('커뮤니티', 1, profileImage));
 

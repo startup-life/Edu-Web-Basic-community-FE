@@ -3,9 +3,9 @@ import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import {
     authCheck,
-    deleteCookie,
     getServerUrl,
     prependChild,
+    resolveImageUrl,
     validPassword,
 } from '../utils/function.js';
 
@@ -16,11 +16,10 @@ const HTTP_CREATED = 201;
 
 const dataResponse = await authCheck();
 const data = await dataResponse.json();
-const userId = data.data.userId;
-const profileImage =
-    data.data.profileImagePath === undefined || data.data.profileImagePath === null
-        ? DEFAULT_PROFILE_IMAGE
-        : `${getServerUrl()}${data.data.profileImagePath}`;
+const profileImage = resolveImageUrl(
+    data.data.profileImageUrl,
+    DEFAULT_PROFILE_IMAGE,
+);
 
 const modifyData = {
     password: '',
@@ -97,11 +96,17 @@ const addEventForInputElements = () => {
 const modifyPassword = async () => {
     const { password } = modifyData;
 
-    const response = await changePassword(userId, password);
+    const { status } = await changePassword(password);
 
-    if (response.status == HTTP_CREATED) {
-        deleteCookie('session');
-        deleteCookie('userId');
+    if (status == HTTP_CREATED) {
+        try {
+            await fetch(`${getServerUrl()}/v1/auth/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error('로그아웃 요청 실패:', error);
+        }
         localStorage.clear();
         location.href = '/html/login.html';
     } else {

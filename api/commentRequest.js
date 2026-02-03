@@ -1,29 +1,26 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const deleteComment = (postId, commentId) => {
-    const result = fetch(
-        `${getServerUrl()}/posts/${postId}/comments/${commentId}`,
+    const result = requestJson(
+        `${getServerUrl()}/v1/posts/${postId}/comments/${commentId}`,
         {
             method: 'DELETE',
-            headers: {
-                session: getCookie('session'),
-                userId: getCookie('userId'),
-            },
+            credentials: 'include',
         },
     );
     return result;
 };
 
 export const updateComment = (postId, commentId, commentContent) => {
-    const result = fetch(
-        `${getServerUrl()}/posts/${postId}/comments/${commentId}`,
+    const result = requestJson(
+        `${getServerUrl()}/v1/posts/${postId}/comments/${commentId}`,
         {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                session: getCookie('session'),
-                userId: getCookie('userId'),
             },
+            credentials: 'include',
             body: JSON.stringify(commentContent),
         },
     );

@@ -1,26 +1,25 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
-export const userModify = async (userId, changeData) => {
-    const result = await fetch(`${getServerUrl()}/users/${userId}`, {
+export const userModify = async changeData => {
+    const result = await requestJson(`${getServerUrl()}/v1/users/me`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: userId,
         },
+        credentials: 'include',
         body: JSON.stringify(changeData),
     });
     return result;
 };
 
-export const userDelete = async userId => {
-    const result = await fetch(`${getServerUrl()}/users/${userId}`, {
+export const userDelete = async () => {
+    const result = await requestJson(`${getServerUrl()}/v1/users/me`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: userId,
         },
+        credentials: 'include',
     });
     return result;
 };

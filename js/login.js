@@ -2,7 +2,6 @@ import Header from '../component/header/header.js';
 import {
     authCheckReverse,
     prependChild,
-    setCookie,
     validEmail,
 } from '../utils/function.js';
 import { userLogin } from '../api/loginRequest.js';
@@ -23,17 +22,18 @@ const loginClick = async () => {
     const { id: email, password } = loginData;
     const helperTextElement = document.querySelector('.helperText');
 
-    const response = await userLogin(email, password);
-    if (!response.ok) {
+    const { ok, status, code } = await userLogin(email, password);
+    if (!ok) {
         updateHelperText(
             helperTextElement,
-            '*입력하신 계정 정보가 정확하지 않았습니다.',
+            code === 'INVALID_INPUT'
+                ? '*입력값을 확인해주세요.'
+                : '*입력하신 계정 정보가 정확하지 않았습니다.',
         );
         return;
     }
 
-    const result = await response.json();
-    if (response.status !== HTTP_OK) {
+    if (status !== HTTP_OK) {
         updateHelperText(
             helperTextElement,
             '*입력하신 계정 정보가 정확하지 않았습니다.',
@@ -42,8 +42,6 @@ const loginClick = async () => {
     }
     updateHelperText(helperTextElement);
 
-    setCookie('session', result.data.sessionId, 14);
-    setCookie('userId', result.data.userId, 14);
     location.href = '/html/index.html';
 };
 
@@ -130,7 +128,6 @@ const init = async () => {
     prependChild(document.body, Header('커뮤니티', 0));
     eventSet();
     localStorage.clear();
-    document.cookie = '';
 };
 
 init();

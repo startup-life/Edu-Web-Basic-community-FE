@@ -1,6 +1,6 @@
 import BoardItem from '../component/board/boardItem.js';
 import Header from '../component/header/header.js';
-import { authCheck, getServerUrl, prependChild } from '../utils/function.js';
+import { authCheck, getServerUrl, prependChild, resolveImageUrl } from '../utils/function.js';
 import { getPosts } from '../api/indexRequest.js';
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
@@ -11,13 +11,11 @@ const ITEMS_PER_LOAD = 5;
 
 // getBoardItem 함수
 const getBoardItem = async (offset = 0, limit = 5) => {
-    const response = await getPosts(offset, limit);
-    if (!response.ok) {
+    const { ok, data } = await getPosts(offset, limit);
+    if (!ok) {
         throw new Error('Failed to load post list.');
     }
-
-    const data = await response.json();
-    return data.data;
+    return data;
 };
 
 const setBoardItem = boardData => {
@@ -26,14 +24,14 @@ const setBoardItem = boardData => {
         const itemsHtml = boardData
             .map(data =>
                 BoardItem(
-                    data.post_id,
-                    data.created_at,
-                    data.post_title,
-                    data.hits,
-                    data.profileImagePath === null ? null : data.profileImagePath,
-                    data.nickname,
-                    data.comment_count,
-                    data.like,
+                    data.id,
+                    data.createdAt,
+                    data.title,
+                    data.viewCount,
+                    data.author ? data.author.profileImageUrl : null,
+                    data.author ? data.author.nickname : null,
+                    data.commentCount,
+                    data.likeCount,
                 ),
             )
             .join('');
@@ -81,12 +79,14 @@ const init = async () => {
             return;
         }
 
-        const profileImagePath =
-            data.data.profileImagePath === null ? DEFAULT_PROFILE_IMAGE : `${getServerUrl()}${data.data.profileImagePath}`;
+        const profileImageUrl = resolveImageUrl(
+            data.data.profileImageUrl,
+            DEFAULT_PROFILE_IMAGE,
+        );
 
         prependChild(
             document.body,
-            Header('Community', 0, profileImagePath),
+            Header('Community', 0, profileImageUrl),
         );
 
         const boardList = await getBoardItem();

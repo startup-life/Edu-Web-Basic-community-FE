@@ -1,47 +1,36 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const getPost = postId => {
-    const result = fetch(`${getServerUrl()}/posts/${postId}`, {
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
-        noCORS: true,
+    const result = requestJson(`${getServerUrl()}/v1/posts/${postId}`, {
+        credentials: 'include',
     });
     return result;
 };
 
 export const deletePost = async postId => {
-    const result = await fetch(`${getServerUrl()}/posts/${postId}`, {
+    const result = await requestJson(`${getServerUrl()}/v1/posts/${postId}`, {
         method: 'DELETE',
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
+        credentials: 'include',
     });
     return result;
 };
 
 export const writeComment = async (pageId, comment) => {
-    const result = await fetch(`${getServerUrl()}/posts/${pageId}/comments`, {
+    const result = await requestJson(`${getServerUrl()}/v1/posts/${pageId}/comments`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            session: getCookie('session'),
-            userId: getCookie('userId'),
         },
+        credentials: 'include',
         body: JSON.stringify({ commentContent: comment }),
     });
     return result;
 };
 
 export const getComments = async postId => {
-    const result = await fetch(`${getServerUrl()}/posts/${postId}/comments`, {
-        headers: {
-            session: getCookie('session'),
-            userId: getCookie('userId'),
-        },
-        noCORS: true,
+    const result = await requestJson(`${getServerUrl()}/v1/posts/${postId}/comments`, {
+        credentials: 'include',
     });
     return result;
 };

@@ -1,14 +1,11 @@
-import { getServerUrl, getCookie } from '../utils/function.js';
+import { getServerUrl } from '../utils/function.js';
+import { requestJson } from '../utils/request.js';
 
 export const getPosts = (offset, limit) => {
-    const result = fetch(
-        `${getServerUrl()}/posts?offset=${offset}&limit=${limit}`,
+    const result = requestJson(
+        `${getServerUrl()}/v1/posts?offset=${offset}&limit=${limit}`,
         {
-            headers: {
-                session: getCookie('session'),
-                userId: getCookie('userId'),
-            },
-            noCORS: true,
+            credentials: 'include',
         },
     );
     return result;
