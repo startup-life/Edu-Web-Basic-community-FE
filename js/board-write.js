@@ -55,10 +55,10 @@ const getBoardData = () => {
     return {
         title: boardWrite.title,
         content: boardWrite.content,
-        attachFilePath:
-            localStorage.getItem('postFilePath') === null
+        attachFileUrl:
+            localStorage.getItem('postFileUrl') === null
                 ? undefined
-                : localStorage.getItem('postFilePath'),
+                : localStorage.getItem('postFileUrl'),
     };
 };
 
@@ -77,7 +77,7 @@ const addBoard = async () => {
         if (!ok) throw new Error('서버 응답 오류');
 
         if (status === HTTP_CREATED) {
-            localStorage.removeItem('postFilePath');
+            localStorage.removeItem('postFileUrl');
             window.location.href = `/html/board.html?id=${data.insertId}`;
         } else {
             const helperElement = contentHelpElement;
@@ -94,7 +94,7 @@ const addBoard = async () => {
         if (!ok) throw new Error('서버 응답 오류');
 
         if (status === HTTP_OK) {
-            localStorage.removeItem('postFilePath');
+            localStorage.removeItem('postFileUrl');
             window.location.href = `/html/board.html?id=${post_id}`;
         } else {
             Dialog('게시글', '게시글 수정 실패');
@@ -144,12 +144,12 @@ const changeEventHandler = async (event, uid) => {
         try {
             const { ok, data } = await fileUpload(formData);
             if (!ok) throw new Error('서버 응답 오류');
-            localStorage.setItem('postFilePath', data.filePath);
+            localStorage.setItem('postFileUrl', data.fileUrl);
         } catch (error) {
             console.error('업로드 중 오류 발생:', error);
         }
     } else if (uid === 'imagePreviewText') {
-        localStorage.removeItem('postFilePath');
+        localStorage.removeItem('postFileUrl');
         imagePreviewText.style.display = 'none';
     }
 
@@ -192,18 +192,19 @@ const setModifyData = data => {
     titleInput.value = data.title;
     contentInput.value = data.content;
 
-    if (data.filePath) {
-        // filePath에서 파일 이름만 추출하여 표시
-        const fileName = data.filePath.split('/').pop();
+    const fileUrl = data.fileUrl || resolveImageUrl(data.filePath);
+    if (fileUrl) {
+        // fileUrl에서 파일 이름만 추출하여 표시
+        const fileName = fileUrl.split('/').pop();
         imagePreviewText.innerHTML =
             fileName + `<span class="deleteFile">X</span>`;
         imagePreviewText.style.display = 'block';
-        localStorage.setItem('postFilePath', data.filePath);
+        localStorage.setItem('postFileUrl', fileUrl);
 
         // 이제 추출된 파일명을 사용하여 File 객체를 생성
         const attachFile = new File(
             // 실제 이미지 데이터 대신 URL을 사용
-            [`${getServerUrl()}${data.filePath}`],
+            [fileUrl],
             // 추출된 파일명
             fileName,
             // MIME 타입 지정, 실제 이미지 타입에 맞게 조정 필요

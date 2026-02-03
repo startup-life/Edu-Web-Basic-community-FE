@@ -53,10 +53,11 @@ const setBoardDetail = data => {
 
     // 바디 정보
     const contentImgElement = document.querySelector('.contentImg');
-    if (data.filePath) {
-        console.log(data.filePath);
+    const fileUrl = data.fileUrl || resolveImageUrl(data.filePath);
+    if (fileUrl) {
+        console.log(fileUrl);
         const img = document.createElement('img');
-        img.src = `${getServerUrl()}${data.filePath}`;
+        img.src = fileUrl;
         contentImgElement.appendChild(img);
     }
     const contentElement = document.querySelector('.content');
