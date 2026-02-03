@@ -1,21 +1,29 @@
 import BoardItem from '../component/board/boardItem.js';
+import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import { authCheck, getServerUrl, prependChild, resolveImageUrl } from '../utils/function.js';
-import { getPosts } from '../api/indexRequest.js';
+import { getPosts, searchPosts } from '../api/indexRequest.js';
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
 const HTTP_NOT_AUTHORIZED = 401;
 const SCROLL_THRESHOLD = 0.9;
 const INITIAL_OFFSET = 5;
 const ITEMS_PER_LOAD = 5;
+let currentKeyword = '';
+let offset = 0;
+let isEnd = false;
+let isProcessing = false;
 
 // getBoardItem 함수
-const getBoardItem = async (offset = 0, limit = 5) => {
-    const { ok, data } = await getPosts(offset, limit);
-    if (!ok) {
+const getBoardItem = async (offsetValue = 0, limitValue = 5) => {
+    const result =
+        currentKeyword.trim() === ''
+            ? await getPosts(offsetValue, limitValue)
+            : await searchPosts(currentKeyword, offsetValue, limitValue);
+    if (!result.ok) {
         throw new Error('Failed to load post list.');
     }
-    return data;
+    return result.data;
 };
 
 const setBoardItem = boardData => {
@@ -39,33 +47,74 @@ const setBoardItem = boardData => {
     }
 };
 
+const resetBoardList = () => {
+    const boardList = document.querySelector('.boardList');
+    if (boardList) {
+        boardList.innerHTML = '';
+    }
+};
+
+const loadBoardItems = async ({ reset = false } = {}) => {
+    if (isProcessing || (!reset && isEnd)) return;
+    isProcessing = true;
+
+    try {
+        if (reset) {
+            offset = 0;
+            isEnd = false;
+            resetBoardList();
+        }
+        const items = await getBoardItem(offset, ITEMS_PER_LOAD);
+        if (!items || items.length === 0) {
+            isEnd = true;
+            return;
+        }
+        setBoardItem(items);
+        offset += ITEMS_PER_LOAD;
+    } catch (error) {
+        console.error('Error fetching items:', error);
+        isEnd = true;
+    } finally {
+        isProcessing = false;
+    }
+};
+
+const addSearchEvent = () => {
+    const searchInput = document.querySelector('#searchInput');
+    const searchButton = document.querySelector('.searchButton');
+    if (!searchInput || !searchButton) return;
+
+    const runSearch = async () => {
+        const trimmedKeyword = searchInput.value.trim();
+        if (trimmedKeyword.length > 0 && trimmedKeyword.length < 2) {
+            Dialog('검색 실패', '검색어는 2글자 이상 입력해주세요.');
+            return;
+        }
+        currentKeyword = trimmedKeyword;
+        await loadBoardItems({ reset: true });
+    };
+
+    searchButton.addEventListener('click', runSearch);
+    searchInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            runSearch();
+        }
+    });
+};
+
 // 스크롤 이벤트 추가
 const addInfinityScrollEvent = () => {
-    let offset = INITIAL_OFFSET,
-        isEnd = false,
-        isProcessing = false;
+    offset = INITIAL_OFFSET;
+    isEnd = false;
+    isProcessing = false;
 
     window.addEventListener('scroll', async () => {
         const hasScrolledToThreshold =
             window.scrollY + window.innerHeight >=
             document.documentElement.scrollHeight * SCROLL_THRESHOLD;
-        if (hasScrolledToThreshold && !isProcessing && !isEnd) {
-            isProcessing = true;
-
-            try {
-                const newItems = await getBoardItem(offset, ITEMS_PER_LOAD);
-                if (!newItems || newItems.length === 0) {
-                    isEnd = true;
-                } else {
-                    offset += ITEMS_PER_LOAD;
-                    setBoardItem(newItems);
-                }
-            } catch (error) {
-                console.error('Error fetching new items:', error);
-                isEnd = true;
-            } finally {
-                isProcessing = false;
-            }
+        if (hasScrolledToThreshold) {
+            loadBoardItems();
         }
     });
 };
@@ -89,9 +138,9 @@ const init = async () => {
             Header('Community', 0, profileImageUrl),
         );
 
-        const boardList = await getBoardItem();
-        setBoardItem(boardList);
+        await loadBoardItems({ reset: true });
 
+        addSearchEvent();
         addInfinityScrollEvent();
     } catch (error) {
         console.error('Initialization failed:', error);
