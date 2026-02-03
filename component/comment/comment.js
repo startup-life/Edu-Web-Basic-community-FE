@@ -26,14 +26,14 @@ const CommentItem = (data, writerId, postId, commentId) => {
     const CommentModify = () => {
         // 댓글 내용을 보여주는 p 태그 찾기
         const p = commentInfoWrap.querySelector('p');
+        if (!p) return;
         // 현재 댓글 내용 저장
         const originalContent = p.innerHTML.replace(/<br>/g, '\n');
 
         // textarea 생성 및 설정
         const textarea = document.createElement('textarea');
+        textarea.className = 'commentEditTextarea';
         textarea.value = originalContent;
-        textarea.style.width = '100%'; // textarea 너비 설정
-        textarea.style.height = '100px'; // textarea 높이 설정
         textarea.maxLength = 1500; // 최대 글자 수 제한
 
         // 사용자가 입력할 때마다 글자 수 체크
@@ -46,8 +46,15 @@ const CommentItem = (data, writerId, postId, commentId) => {
             }
         });
 
+        const editWrap = document.createElement('div');
+        editWrap.className = 'commentEditWrap';
+
+        const editActions = document.createElement('div');
+        editActions.className = 'commentEditActions';
+
         // 수정 완료(저장) 버튼 생성 및 설정
         const saveButton = document.createElement('button');
+        saveButton.className = 'commentEditSave';
         saveButton.textContent = '저장';
         saveButton.onclick = async () => {
             if (textarea.value.length === 0) {
@@ -69,21 +76,21 @@ const CommentItem = (data, writerId, postId, commentId) => {
 
         // 취소 버튼 생성 및 설정
         const cancelButton = document.createElement('button');
+        cancelButton.className = 'commentEditCancel';
         cancelButton.textContent = '취소';
         cancelButton.onclick = () => {
             // textarea를 원래의 p 태그로 다시 변경
             p.innerHTML = originalContent.replace(/\n/g, '<br>'); // 원래 내용으로 복원
-            commentInfoWrap.replaceChild(p, textarea); // textarea를 p로 교체
-            commentInfoWrap.removeChild(saveButton); // 저장 버튼 제거
-            commentInfoWrap.removeChild(cancelButton); // 취소 버튼 제거
+            commentInfoWrap.replaceChild(p, editWrap); // 편집 영역을 p로 교체
         };
 
-        // p 태그를 textarea로 대체
-        commentInfoWrap.replaceChild(textarea, p);
-        // textarea 옆에 저장 버튼 추가
-        commentInfoWrap.appendChild(saveButton);
-        // 저장 버튼 옆에 취소 버튼 추가
-        commentInfoWrap.appendChild(cancelButton);
+        editActions.appendChild(cancelButton);
+        editActions.appendChild(saveButton);
+        editWrap.appendChild(textarea);
+        editWrap.appendChild(editActions);
+
+        // p 태그를 편집 영역으로 대체
+        commentInfoWrap.replaceChild(editWrap, p);
     };
 
     const commentItem = document.createElement('div');
@@ -103,6 +110,7 @@ const CommentItem = (data, writerId, postId, commentId) => {
     commentInfoWrap.className = 'commentInfoWrap';
 
     const infoDiv = document.createElement('div');
+    infoDiv.className = 'commentInfoHeader';
 
     const h3 = document.createElement('h3');
     h3.textContent = data.author ? data.author.nickname : '';
