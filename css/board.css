@@ -142,9 +142,11 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 16px;
+    width: 100%;
 }
-.commentWrap div {
+.commentWrap .countItem {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -154,6 +156,21 @@
     height: 77px;
     border-radius: 16px;
     background-color: #d9d9d9;
+}
+.commentWrap .likeButton {
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    background-color: #d9d9d9;
+    font: inherit;
+    color: inherit;
+}
+.commentWrap .likeButton.is-active {
+    background-color: #aca0eb;
+}
+.commentWrap .likeButton:focus-visible {
+    outline: 2px solid #7f6aee;
+    outline-offset: 2px;
 }
 
 .commentWrap h3 {

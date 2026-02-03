@@ -34,3 +34,19 @@ export const getComments = async postId => {
     });
     return result;
 };
+
+export const likePost = async postId => {
+    const result = await requestJson(`${getServerUrl()}/v1/posts/${postId}/likes`, {
+        method: 'POST',
+        credentials: 'include',
+    });
+    return result;
+};
+
+export const unlikePost = async postId => {
+    const result = await requestJson(`${getServerUrl()}/v1/posts/${postId}/likes`, {
+        method: 'DELETE',
+        credentials: 'include',
+    });
+    return result;
+};
