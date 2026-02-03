@@ -40,7 +40,7 @@ const setBoardDetail = data => {
     const nicknameElement = document.querySelector('.nickname');
 
     titleElement.textContent = data.title;
-    const date = new Date(data.created_at);
+    const date = new Date(data.createdAt);
     const formattedDate = `${date.getFullYear()}-${padTo2Digits(date.getMonth() + 1)}-${padTo2Digits(date.getDate())} ${padTo2Digits(date.getHours())}:${padTo2Digits(date.getMinutes())}:${padTo2Digits(date.getSeconds())}`;
     createdAtElement.textContent = formattedDate;
 
@@ -66,16 +66,17 @@ const setBoardDetail = data => {
     const viewCountElement = document.querySelector('.viewCount h3');
     // hits에 K, M 이 포함되어 있을 경우 그냥 출력
     // 포함되어 있지 않다면 + 1
-    if (data.view_count.includes('K') || data.view_count.includes('M')) {
-        viewCountElement.textContent = data.view_count;
+    const viewCountValue = String(data.viewCount ?? '');
+    if (viewCountValue.includes('K') || viewCountValue.includes('M')) {
+        viewCountElement.textContent = viewCountValue;
     } else {
         viewCountElement.textContent = (
-            parseInt(data.view_count, 10) + 1
+            parseInt(viewCountValue || '0', 10) + 1
         ).toLocaleString();
     }
 
     const commentCountElement = document.querySelector('.commentCount h3');
-    commentCountElement.textContent = data.comment_count.toLocaleString();
+    commentCountElement.textContent = data.commentCount.toLocaleString();
 };
 
 const setBoardModify = async (data, myInfo) => {
@@ -194,7 +195,7 @@ const init = async () => {
 
         const pageData = await getBoardDetail(pageId);
 
-        if (parseInt(pageData.user_id, 10) === parseInt(myInfo.userId, 10)) {
+        if (parseInt(pageData.userId, 10) === parseInt(myInfo.userId, 10)) {
             setBoardModify(pageData, myInfo);
         }
         setBoardDetail(pageData);
