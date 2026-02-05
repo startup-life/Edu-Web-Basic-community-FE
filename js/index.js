@@ -9,17 +9,32 @@ const HTTP_NOT_AUTHORIZED = 401;
 const SCROLL_THRESHOLD = 0.9;
 const INITIAL_OFFSET = 5;
 const ITEMS_PER_LOAD = 5;
+const DEFAULT_SORT = 'recent';
 let currentKeyword = '';
+let currentSort = DEFAULT_SORT;
 let offset = 0;
 let isEnd = false;
 let isProcessing = false;
+
+const updateSortVisibility = () => {
+    const sortRow = document.querySelector('#searchSortRow');
+    if (!sortRow) return;
+    const isSearching = currentKeyword.trim().length > 0;
+    sortRow.classList.toggle('isHidden', !isSearching);
+    sortRow.setAttribute('aria-hidden', String(!isSearching));
+};
 
 // getBoardItem 함수
 const getBoardItem = async (offsetValue = 0, limitValue = 5) => {
     const result =
         currentKeyword.trim() === ''
             ? await getPosts(offsetValue, limitValue)
-            : await searchPosts(currentKeyword, offsetValue, limitValue);
+            : await searchPosts(
+                  currentKeyword,
+                  offsetValue,
+                  limitValue,
+                  currentSort,
+              );
     if (!result.ok) {
         throw new Error('Failed to load post list.');
     }
@@ -91,6 +106,7 @@ const addSearchEvent = () => {
             return;
         }
         currentKeyword = trimmedKeyword;
+        updateSortVisibility();
         await loadBoardItems({ reset: true });
     };
 
@@ -100,6 +116,18 @@ const addSearchEvent = () => {
             event.preventDefault();
             runSearch();
         }
+    });
+};
+
+const addSortEvent = () => {
+    const sortSelect = document.querySelector('#searchSortSelect');
+    if (!sortSelect) return;
+    sortSelect.value = currentSort;
+
+    sortSelect.addEventListener('change', async () => {
+        currentSort = sortSelect.value || DEFAULT_SORT;
+        if (currentKeyword.trim().length === 0) return;
+        await loadBoardItems({ reset: true });
     });
 };
 
@@ -138,9 +166,11 @@ const init = async () => {
             Header('Community', 0, profileImageUrl),
         );
 
+        updateSortVisibility();
         await loadBoardItems({ reset: true });
 
         addSearchEvent();
+        addSortEvent();
         addInfinityScrollEvent();
     } catch (error) {
         console.error('Initialization failed:', error);
