@@ -138,16 +138,7 @@ const setBoardDetail = data => {
     });
 
     const viewCountElement = document.querySelector('.viewCount h3');
-    // hits에 K, M 이 포함되어 있을 경우 그냥 출력
-    // 포함되어 있지 않다면 + 1
-    const viewCountValue = String(data.viewCount ?? '');
-    if (viewCountValue.includes('K') || viewCountValue.includes('M')) {
-        viewCountElement.textContent = viewCountValue;
-    } else {
-        viewCountElement.textContent = (
-            parseInt(viewCountValue || '0', 10) + 1
-        ).toLocaleString();
-    }
+    viewCountElement.textContent = formatCount(data.viewCount);
 
     const commentCountElement = document.querySelector('.commentCount h3');
     commentCountElement.textContent = data.commentCount.toLocaleString();

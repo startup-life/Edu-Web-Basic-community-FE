@@ -1,4 +1,15 @@
 export const getServerUrl = () => {
+    const configUrl =
+        typeof window !== 'undefined' &&
+        window.__APP_CONFIG__ &&
+        window.__APP_CONFIG__.API_BASE_URL
+            ? String(window.__APP_CONFIG__.API_BASE_URL).trim()
+            : '';
+
+    if (configUrl) {
+        return configUrl.replace(/\/+$/, '');
+    }
+
     const host = window.location.hostname;
     return host.includes('localhost')
         ? 'http://localhost:3000'
